@@ -1,0 +1,56 @@
+# Sustituye el dominio, la carpeta pública y las rutas del certificado.
+# Incluye este archivo desde el bloque http de Nginx.
+limit_req_zone $binary_remote_addr zone=redlila_resultados:10m rate=2r/s;
+
+server {
+  listen 80;
+  server_name redlila.example.org;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name redlila.example.org;
+  ssl_certificate /etc/letsencrypt/live/redlila.example.org/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/redlila.example.org/privkey.pem;
+
+  root /var/www/redlila/frontend/dist;
+  index index.html;
+  add_header X-Content-Type-Options nosniff always;
+  add_header Referrer-Policy no-referrer always;
+
+  location /assets/ {
+    try_files $uri =404;
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+  }
+
+  location = /api/quiz/resultados {
+    limit_req zone=redlila_resultados burst=40 nodelay;
+    limit_req_status 429;
+    proxy_pass http://127.0.0.1:3001;
+    proxy_read_timeout 15s;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location /api/ {
+    proxy_pass http://127.0.0.1:3001;
+    proxy_read_timeout 15s;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location / {
+    try_files $uri $uri/ /index.html;
+    add_header Cache-Control "no-store";
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+  }
+}

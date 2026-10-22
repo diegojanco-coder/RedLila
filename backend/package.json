@@ -1,0 +1,22 @@
+{
+  "name": "redlila-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/app.js",
+    "start": "node src/app.js",
+    "setup:local-db": "node scripts/setup-local-db.js",
+    "migrate:local-004": "node scripts/migrate-local-004.js",
+    "migrate:local-005": "node scripts/migrate-local-005.js",
+    "smoke:local": "node scripts/smoke-local.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "mysql2": "^3.14.3"
+  },
+  "engines": { "node": ">=20" }
+}

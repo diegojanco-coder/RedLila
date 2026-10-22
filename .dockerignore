@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.local
+runtime
+.git
+.tools
+*.docx
+CODIGO_COMPLETO.md
+frontend/CODIGO_COMPLETO.md
