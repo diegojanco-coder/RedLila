@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clasificar, construirOrientacion, contenidoValido, evaluar, umbralesValidos } from '../src/services/evaluacion.service.js';
+import { calcularPuntajeMaximo, clasificar, construirOrientacion, contenidoValido, evaluar, umbralesValidos } from '../src/services/evaluacion.service.js';
 
 test('clasifica los límites de cada nivel', () => {
   assert.equal(clasificar(0, false), 'verde');
@@ -38,6 +38,16 @@ test('detecta preguntas sin opciones suficientes o umbrales inalcanzables', () =
   assert.equal(contenidoValido(version, preguntas, [
     { preguntaId: 1, puntaje: 0 }, { preguntaId: 1, puntaje: 3 }
   ]), true);
+});
+
+test('calcula el puntaje máximo con la opción más alta de cada pregunta', () => {
+  const preguntas = [{ id: 1, categoria: 'digital' }, { id: 2, categoria: 'fisica' }];
+  assert.equal(calcularPuntajeMaximo(preguntas, [
+    { preguntaId: 1, puntaje: 0 }, { preguntaId: 1, puntaje: 3 },
+    { preguntaId: 2, puntaje: 0 }, { preguntaId: 2, puntaje: 2 }
+  ]), 5);
+  assert.equal(calcularPuntajeMaximo(preguntas, [{ preguntaId: 1, puntaje: 0 }]), null);
+  assert.equal(calcularPuntajeMaximo([], []), null);
 });
 
 test('crea una orientación explicable con las señales de mayor prioridad', () => {

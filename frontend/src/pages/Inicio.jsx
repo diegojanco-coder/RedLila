@@ -63,12 +63,12 @@ export default function Inicio() {
             <p>Reconocer una señal, hablar con alguien de confianza o consultar un recurso puede ser un primer paso. Puedes hacerlo a tu ritmo y desde un lugar seguro.</p>
             <Link className="text-link" to="/informacion">Conoce las señales y tus opciones <Icon name="arrow" size={17} /></Link>
           </div>
-          <img className="story-art" src="/images/redlila-mujeres.webp" width="1774" height="887" alt="Ilustración de tres mujeres bolivianas unidas" decoding="async" fetchPriority="low" />
+          <img className="story-art" src="/images/redlila-mujeres.webp" width="1774" height="887" alt="Ilustración de tres mujeres bolivianas unidas" decoding="async" loading="lazy" />
         </div>
       </section>
 
       <section className="section steps-section" aria-labelledby="como-funciona">
-        <div className="section-heading"><p className="eyebrow">RedLila te acompaña</p><h2 id="como-funciona">Un espacio para aprender y encontrar orientación</h2><p>La información puede ayudar a reconocer patrones y pensar en próximos pasos. Tú decides qué consultar y cuándo hacerlo.</p></div>
+        <div className="section-heading"><p className="eyebrow">RedLila te acompaña</p><h2 id="como-funciona">Un espacio para aprender y encontrar orientación</h2><p><strong>Nuestro objetivo:</strong> ayudar a reconocer a tiempo las señales de violencia hacia la mujer, informar sobre derechos y acercar contactos de apoyo en Bolivia. Tú decides qué consultar y cuándo hacerlo.</p></div>
         <div className="feature-grid">
           {pasos.map(paso => <article className="feature-card" key={paso.numero}><span className="feature-icon"><Icon name={paso.icono} size={21} /></span><span className="feature-number">{paso.numero}</span><h3>{paso.titulo}</h3><p>{paso.texto}</p></article>)}
         </div>

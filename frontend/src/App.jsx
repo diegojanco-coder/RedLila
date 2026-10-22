@@ -11,8 +11,13 @@ import Informacion from './pages/Informacion.jsx';
 
 const enlaces = [
   ['/', 'Inicio'], ['/informacion', 'Información'], ['/quiz', 'Violentómetro'], ['/ayuda', 'Directorio'],
-  ['/desarrolladores', 'Proyecto']
+  ['/desarrolladores', 'Desarrolladores']
 ];
+
+const titulos = {
+  '/': 'Inicio', '/informacion': 'Información', '/quiz': 'Violentómetro',
+  '/resultados': 'Tu resultado', '/ayuda': 'Directorio de apoyo', '/desarrolladores': 'Desarrolladores'
+};
 
 export default function App() {
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -21,6 +26,8 @@ export default function App() {
 
   useEffect(() => {
     if (location.pathname !== '/resultados') setResultadoTemporal(null);
+    document.title = `${titulos[location.pathname] || 'Inicio'} | RedLila`;
+    window.scrollTo(0, 0);
   }, [location.pathname]);
   return (
     <div className="app-shell">

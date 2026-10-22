@@ -8,7 +8,9 @@ export const dbConfig = {
   user: process.env.DB_USER || process.env.MYSQLUSER || 'redlila',
   password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '',
   database: process.env.DB_NAME || process.env.MYSQLDATABASE || 'redlila',
-  charset: 'utf8mb4'
+  charset: 'utf8mb4',
+  // Bases administradas como TiDB Cloud exigen conexiones cifradas.
+  ...(process.env.DB_SSL === 'true' ? { ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true } } : {})
 };
 
 export const pool = mysql.createPool({

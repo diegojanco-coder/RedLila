@@ -9,6 +9,10 @@ services:
         value: production
       - key: SERVE_FRONTEND
         value: "true"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DB_SSL
+        value: "true"
       - key: INIT_DB
         sync: false
       - key: DB_HOST

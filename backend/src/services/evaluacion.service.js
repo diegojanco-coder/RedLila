@@ -223,8 +223,9 @@ export function umbralesValidos(version, puntajeMaximo) {
     umbralNaranja < umbralRojo && umbralRojo <= puntajeMaximo;
 }
 
-export function contenidoValido(version, preguntas, opciones) {
-  if (!preguntas.length) return false;
+// Devuelve la suma de los puntajes más altos de cada pregunta, o null si el contenido es inválido.
+export function calcularPuntajeMaximo(preguntas, opciones) {
+  if (!preguntas.length) return null;
   const porPregunta = new Map();
   for (const opcion of opciones) {
     const lista = porPregunta.get(opcion.preguntaId) || [];
@@ -236,10 +237,15 @@ export function contenidoValido(version, preguntas, opciones) {
     const lista = porPregunta.get(pregunta.id) || [];
     if (typeof pregunta.categoria !== 'string' || !pregunta.categoria.trim() ||
         lista.length < 2 || lista.some(opcion =>
-      !Number.isSafeInteger(opcion.puntaje) || opcion.puntaje < 0 || opcion.puntaje > 3)) return false;
+      !Number.isSafeInteger(opcion.puntaje) || opcion.puntaje < 0 || opcion.puntaje > 3)) return null;
     puntajeMaximo += Math.max(...lista.map(opcion => opcion.puntaje));
   }
-  return umbralesValidos(version, puntajeMaximo);
+  return puntajeMaximo;
+}
+
+export function contenidoValido(version, preguntas, opciones) {
+  const puntajeMaximo = calcularPuntajeMaximo(preguntas, opciones);
+  return puntajeMaximo !== null && umbralesValidos(version, puntajeMaximo);
 }
 
 export async function evaluar({ versionId, opcionIds, solicitudId }) {
@@ -307,6 +313,8 @@ export async function evaluar({ versionId, opcionIds, solicitudId }) {
   return {
     versionId,
     ...guardado,
+    puntajeMaximo: calcularPuntajeMaximo(preguntas, opciones),
+    umbrales,
     emergenciaInmediata,
     orientacion: construirOrientacion(selecciones, nivel, emergenciaInmediata)
   };
