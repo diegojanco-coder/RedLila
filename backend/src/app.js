@@ -14,8 +14,55 @@ if (process.env.TRUST_PROXY) {
   const valor = process.env.TRUST_PROXY;
   app.set('trust proxy', /^\d+$/.test(valor) ? Number(valor) : valor);
 }
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
+// Cabeceras defensivas sin dependencias adicionales. Protegen la SPA frente a
+// contenido incrustado, MIME sniffing y ejecución de recursos ajenos.
+app.use((req, res, next) => {
+  res.set({
+    'Content-Security-Policy': "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'",
+    'Cross-Origin-Opener-Policy': 'same-origin',
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), geolocation=(), microphone=(), payment=(), usb=()',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY'
+  });
+  next();
+});
+
+const origenesPermitidos = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+  .split(',').map(origen => origen.trim()).filter(Boolean);
+app.use(cors({
+  origin(origen, callback) {
+    // Las navegaciones y peticiones desde el mismo origen no envían Origin.
+    if (!origen || origenesPermitidos.includes(origen)) return callback(null, true);
+    return callback(null, false);
+  },
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+  maxAge: 86400
+}));
 app.use(express.json({ limit: '10kb' }));
+
+// Límite general en memoria para reducir scraping y denegación de servicio.
+const solicitudes = new Map();
+const ventanaApiMs = 10 * 60 * 1000;
+const maximoApi = 300;
+setInterval(() => {
+  const ahora = Date.now();
+  for (const [ip, dato] of solicitudes) if (dato.vence <= ahora) solicitudes.delete(ip);
+}, ventanaApiMs).unref();
+app.use('/api', (req, res, next) => {
+  const ahora = Date.now();
+  let dato = solicitudes.get(req.ip);
+  if (!dato || dato.vence <= ahora) dato = { cantidad: 0, vence: ahora + ventanaApiMs };
+  dato.cantidad += 1;
+  solicitudes.set(req.ip, dato);
+  if (dato.cantidad > maximoApi) {
+    res.set('Retry-After', String(Math.ceil((dato.vence - ahora) / 1000)));
+    return res.status(429).json({ error: 'Demasiadas solicitudes. Vuelve a intentar en unos minutos.' });
+  }
+  next();
+});
 
 app.get('/api/salud', async (req, res) => {
   try {
